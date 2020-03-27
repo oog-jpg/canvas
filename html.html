@@ -1,0 +1,192 @@
+<html>
+<head>
+<title>Space battle</title>
+</head>
+<body>
+<h1 id="p1">Space battle     </h1>
+
+<canvas id="canvas" width="600" height="800"></canvas>
+<script src='js.js'></script>
+
+<script language="JavaScript">
+
+var can = document.getElementById("canvas");
+var text1 = document.getElementById("p1");
+var c = can.getContext('2d');
+
+player.width = 37;
+player.height = 45;
+    
+var ship_image;
+var bomb_image;
+var bullet_image;
+var ufo_image; 
+var space_image; 
+var boom_image; 
+loadResources();
+   
+ 
+function loadResources() {
+    ship_image = new Image();
+    ship_image.src = "img/ship2.png";
+    bomb_image = new Image();
+    bomb_image.src = "img/bomb.png";
+    bullet_image = new Image();
+    bullet_image.src = "img/bullets.png";  
+    ufo_image = new Image();
+    ufo_image.src = "img/ufo.png";
+    space_image = new Image();
+    space_image.src = "img/space.jpg";
+    boom_image = new Image();
+    boom_image.src = "img/boom.png";
+}
+
+function mainLoop() {
+	var c = can.getContext('2d');
+
+	updateGame();
+	updateBackground();
+    drawBackground(c);
+    
+    if(game.state != 'pause' && game.state != 'start1' )
+        {
+    updateEnemies();
+    if(game.state == 'playing') updatePlayer();	
+	updatePlayerBullets();
+	updateEnemyBullets();
+
+	checkCollisions();
+	
+	drawEnemies(c);
+	drawPlayer(c);
+	drawEnemyBullets(c);
+	drawPlayerBullets(c);
+        }
+    drawOverlay(c);
+}
+
+// =========== player ============
+
+function firePlayerBullet() {
+  playerBullets.push({
+    x: player.x+5,
+    y: player.y - 5,
+    width:10,
+    height:10,
+    width:20,
+    height:20,
+    counter:0,
+  });
+}
+
+function drawPlayer(c) {  
+   
+            c.drawImage(ship_image,1, 0, 37, 45, 
+            player.x, player.y, player.width, player.height);
+}
+
+function drawPlayerBullets(c) {
+    
+  for(i in playerBullets) {
+    var bullet = playerBullets[i];
+    var xoff = (Math.floor(bullet.counter/4)%4)*24;
+    c.drawImage( bullet_image,xoff+10,0+9,8,8,
+      bullet.x,bullet.y,bullet.width,bullet.height);
+  }
+}
+    
+// =========== background ============
+
+function drawBackground(c) {
+   c.drawImage(space_image,0,0,can.width,can.height);         
+}
+
+// =========== enemies ===============
+
+function drawEnemies(c) {
+    
+    for(var i in enemies) {
+        var enemy = enemies[i];
+          var xoff = (enemy.counter%11)*58 + 1;  
+       c.drawImage(ufo_image, xoff, 0, 55, 35,
+      enemy.x,enemy.y,enemy.width,enemy.height);   
+    }
+}
+
+function createEnemyBullet(enemy) {
+    return {
+    x:enemy.x,
+    y:enemy.y+enemy.height,
+    width:30,
+    height:30,
+    counter:0,
+    state: 'fly',
+  }
+}
+
+function drawEnemyBullets(c) {
+     for(var i in enemyBullets) {
+    var bullet = enemyBullets[i];
+     
+         if(bullet.state=='fly')
+             {
+     var xoff = (bullet.counter%9)*12 + 1;   
+    c.drawImage(bomb_image, xoff,1,11,11,
+      bullet.x,bullet.y,bullet.width,bullet.height);
+             }
+            else
+             {
+     var xoff = (bullet.counter%6)*180 + 1;   
+    c.drawImage(boom_image, xoff,1,180,180,
+      bullet.x,bullet.y,bullet.width, bullet.height);                 
+     if(enemyBullets[i].counter==7) enemyBullets.splice(i, 1);
+            }
+    
+  }
+}
+
+
+// =========== overlay ===============
+
+function drawOverlay(c) {
+    if(game.state == "start1") {
+        c.fillStyle = "white";
+        c.font = "Bold 40pt Arial";
+        c.fillText("Space battle",110,200);
+        c.font = "14pt Arial";
+        c.fillText("управления через ← → ↑ ↓", 140,250);
+         c.fillText("для паузы нажмите esc", 140,300);
+         c.fillText("для старта нажмите space", 140,350);
+    }
+      if(game.state == "pause") {
+        c.fillStyle = "white";
+        c.font = "Bold 40pt Arial";
+        c.fillText("Пауза",190,200);
+        c.font = "14pt Arial";
+        c.fillText("для продолжения нажмите space", 140,250);
+    }
+    
+    if(game.state == "load") {
+        c.fillStyle = "white";
+      
+          c.font = "14pt Arial";
+         c.fillText("Уровень сложности = "+(game.level+1),190,200);
+        c.fillText("для продолжения игры space", 190,250);
+    }
+    
+        if(game.state == "over") {
+        c.fillStyle = "white";
+        c.font = "Bold 40pt Arial";
+        c.fillText("Конец",190,200);
+        c.font = "14pt Arial";
+        c.fillText("текущая сложность равна "+game.level, 120,250);
+        c.fillText("для начала новый игры нажмите esc", 120,280);
+        }
+}
+
+doSetup();
+setInterval(mainLoop,1000/30);
+
+</script>
+</body>
+</html>
